@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Cutter Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Righteous&family=Bungee&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="floating-fruits"></div>
+    <div class="background-emojis"></div>
+    
+    <div class="game-container">
+        <div class="score-container">
+            <div class="score-label">SCORE</div>
+            <div id="score">0</div>
+        </div>
+        <div class="question-container">
+            <div id="question"></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="gameOver" class="game-over hidden">
+            <h2>Game Over!</h2>
+            <div class="final-score"></div>
+            <div class="leaderboard">
+                <h3>Top Scores</h3>
+                <div class="leaderboard-list">
+                    <!-- Leaderboard items will be added here -->
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="play-again" onclick="startGame()">Play Again</button>
+                <button class="new-player" onclick="window.location.href='/'">New Player</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { Game } from './src/Game.js';
+        
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        
+        document.addEventListener('mousedown', () => {
+            cursor.classList.add('grow');
+        });
+        
+        document.addEventListener('mouseup', () => {
+            cursor.classList.remove('grow');
+        });
+        
+        // Floating fruits
+        const fruitImages = [
+            '/src/images/apple.png',
+            '/src/images/orange.png',
+            '/src/images/cherry.png',
+            '/src/images/watermelon.png'
+        ];
+        
+        const floatingFruitsContainer = document.querySelector('.floating-fruits');
+        
+        function createFloatingFruit() {
+            const fruit = document.createElement('div');
+            fruit.className = 'floating-fruit';
+            
+            // Random fruit image
+            const randomFruit = fruitImages[Math.floor(Math.random() * fruitImages.length)];
+            fruit.style.backgroundImage = `url(${randomFruit})`;
+            
+            // Random starting position
+            fruit.style.left = Math.random() * 100 + 'vw';
+            
+            // Random animation duration
+            const duration = 10 + Math.random() * 20;
+            fruit.style.animation = `float ${duration}s linear infinite`;
+            
+            floatingFruitsContainer.appendChild(fruit);
+            
+            // Remove fruit after animation
+            setTimeout(() => {
+                fruit.remove();
+            }, duration * 1000);
+        }
+        
+        // Create new floating fruits periodically
+        setInterval(createFloatingFruit, 2000);
+        
+        // Create initial set of fruits
+        for (let i = 0; i < 10; i++) {
+            createFloatingFruit();
+        }
+        
+        // Floating emojis animation
+        const emojis = ['🍎', '🍊', '🍒', '🍉', '🍓', '🍐', '🍇', '🍍'];
+        const floatingFruits = document.querySelector('.floating-fruits');
+
+        function createFloatingEmoji(x, y) {
+            const emoji = document.createElement('div');
+            emoji.className = 'floating-emoji';
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // Position at click coordinates
+            emoji.style.left = x + 'px';
+            emoji.style.bottom = '0px';
+            
+            // Random properties
+            emoji.style.animationDuration = (3 + Math.random() * 2) + 's';
+            emoji.style.fontSize = (20 + Math.random() * 20) + 'px';
+            
+            floatingFruits.appendChild(emoji);
+            
+            // Remove after animation
+            emoji.addEventListener('animationend', () => emoji.remove());
+        }
+
+        // Create multiple emojis in a burst
+        function createEmojiBurst(x, y) {
+            for(let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createFloatingEmoji(x + (Math.random() * 100 - 50), y);
+                }, i * 100);
+            }
+        }
+
+        // Handle correct option selection
+        window.handleCorrectOption = function(x, y) {
+            createEmojiBurst(x, y);
+            const audio = new Audio('/src/sounds/correct.mp3');
+            audio.play().catch(() => {}); // Ignore if sound fails
+        };
+
+        // Update leaderboard display
+        async function updateLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const leaderboard = await response.json();
+                
+                const leaderboardList = document.querySelector('.leaderboard-list');
+                leaderboardList.innerHTML = '';
+                
+                leaderboard.forEach((entry, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="player-info">
+                            <span class="player-rank">#${index + 1}</span>
+                            <span class="player-name">${entry.studentName}</span>
+                            <span class="player-college">${entry.collegeName}</span>
+                        </div>
+                        <div class="player-score">${entry.score}</div>
+                    `;
+                    leaderboardList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+            }
+        }
+
+        // Background emoji animation
+        const backgroundEmojis = ['🍎', '🍊', '🍒', '🍉', '🍓', '🍐', '🍇', '🍍'];
+        const backgroundContainer = document.querySelector('.background-emojis');
+
+        function createBackgroundEmoji() {
+            const emoji = document.createElement('div');
+            emoji.className = 'background-emoji';
+            emoji.textContent = backgroundEmojis[Math.floor(Math.random() * backgroundEmojis.length)];
+            
+            // Random starting position
+            emoji.style.left = Math.random() * 100 + 'vw';
+            emoji.style.top = Math.random() * 100 + 'vh';
+            
+            // Random properties
+            emoji.style.animationDuration = (20 + Math.random() * 20) + 's';
+            emoji.style.fontSize = (20 + Math.random() * 20) + 'px';
+            emoji.style.opacity = 0.1 + Math.random() * 0.2;
+            
+            backgroundContainer.appendChild(emoji);
+            
+            // Remove after animation
+            emoji.addEventListener('animationend', () => {
+                emoji.remove();
+                createBackgroundEmoji(); // Create new one to maintain count
+            });
+        }
+
+        // Create initial background emojis
+        for(let i = 0; i < 15; i++) {
+            createBackgroundEmoji();
+        }
+
+        // Game initialization
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let game;
+
+        function startGame() {
+            if (game) {
+                game.cleanup && game.cleanup();
+                game = null;
+            }
+            
+            document.getElementById('gameOver').classList.add('hidden');
+            document.getElementById('score').textContent = '0';
+            
+            game = new Game(canvas, ctx);
+            game.start();
+        }
+
+        window.startGame = startGame;
+        
+        // Update score display
+        window.updateScore = function(score) {
+            const scoreElement = document.getElementById('score');
+            scoreElement.textContent = score;
+            scoreElement.classList.add('score-updated');
+            setTimeout(() => scoreElement.classList.remove('score-updated'), 300);
+        };
+
+        canvas.addEventListener('click', (e) => {
+            if (game) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                game.handleSlice(x, y);
+            }
+        });
+
+        // Check if user is logged in
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) {
+            window.location.href = '/';
+        } else {
+            startGame();
+            updateLeaderboard();
+        }
+    </script>
+</body>
+</html>

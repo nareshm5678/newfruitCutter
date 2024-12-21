@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Cutter - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            margin: 20vh auto;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .label-text {
+            font-size: 1.1rem;
+        }
+
+        .label-emoji {
+            font-size: 1.5rem;
+            margin-left: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        .error-message {
+            color: #ff3333;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .submit-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+            transform: scale(1.02);
+        }
+
+        .btn-text {
+            font-size: 1.1rem;
+        }
+
+        .btn-emoji {
+            font-size: 1.5rem;
+            margin-left: 0.5rem;
+        }
+
+        .cursor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #333;
+            transition: transform 0.2s;
+        }
+
+        .cursor.grow {
+            transform: scale(1.5);
+        }
+
+        .emoji-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 20px;
+            animation: float 15s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="emoji-background"></div>
+    
+    <div class="login-container animate__animated animate__fadeIn">
+        <div class="login-header">
+            <h1 class="animate__animated animate__pulse animate__infinite">🍎 Fruit Cutter 🍊</h1>
+            <p class="subtitle">Cut fruits, score points, become the champion!</p>
+        </div>
+        
+        <form id="loginForm" class="animate__animated animate__fadeInUp">
+            <div class="form-group">
+                <label for="studentName">
+                    <span class="label-text">Your Name</span>
+                    <span class="label-emoji">👤</span>
+                </label>
+                <input type="text" id="studentName" required placeholder="Enter your name" autocomplete="off">
+                <div class="error-message" id="nameError">Please enter your name</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="collegeName">
+                    <span class="label-text">College Name</span>
+                    <span class="label-emoji">🎓</span>
+                </label>
+                <input type="text" id="collegeName" required placeholder="Enter your college name" autocomplete="off">
+                <div class="error-message" id="collegeError">Please enter your college name</div>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <span class="btn-text">Start Game</span>
+                <span class="btn-emoji">🎮</span>
+            </button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Floating emoji background
+        const emojis = ['🍎', '🍊', '🍒', '🍉', '🍓', '🍐', '🍇', '🍍'];
+        const emojiBackground = document.querySelector('.emoji-background');
+
+        function createFloatingEmoji() {
+            const emoji = document.createElement('div');
+            emoji.className = 'floating-emoji';
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            emoji.style.left = Math.random() * 100 + 'vw';
+            emoji.style.animationDuration = (15 + Math.random() * 10) + 's';
+            emoji.style.opacity = 0.3 + Math.random() * 0.4;
+            emoji.style.fontSize = (20 + Math.random() * 40) + 'px';
+            
+            emojiBackground.appendChild(emoji);
+            
+            emoji.addEventListener('animationend', () => emoji.remove());
+        }
+
+        // Create initial emojis
+        for(let i = 0; i < 20; i++) {
+            createFloatingEmoji();
+        }
+
+        // Create new emojis periodically
+        setInterval(createFloatingEmoji, 2000);
+
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        
+        document.addEventListener('mousedown', () => {
+            cursor.classList.add('grow');
+        });
+        
+        document.addEventListener('mouseup', () => {
+            cursor.classList.remove('grow');
+        });
+
+        // Form handling
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const studentName = document.getElementById('studentName').value.trim();
+            const collegeName = document.getElementById('collegeName').value.trim();
+            
+            document.getElementById('nameError').style.display = 'none';
+            document.getElementById('collegeError').style.display = 'none';
+            
+            let hasError = false;
+            if (!studentName) {
+                document.getElementById('nameError').style.display = 'block';
+                hasError = true;
+            }
+            if (!collegeName) {
+                document.getElementById('collegeError').style.display = 'block';
+                hasError = true;
+            }
+            
+            if (hasError) return;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ studentName, collegeName })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+
+                const data = await response.json();
+                localStorage.setItem('userInfo', JSON.stringify({
+                    userId: data.userId,
+                    studentName,
+                    collegeName
+                }));
+
+                // Show welcome message
+                await Swal.fire({
+                    title: 'Welcome to Fruit Cutter!',
+                    text: `Get ready to play, ${studentName}!`,
+                    icon: 'success',
+                    confirmButtonText: 'Let\'s Go!',
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    color: '#fff',
+                    confirmButtonColor: '#4EEAB1'
+                });
+
+                window.location.href = '/game.html';
+            } catch (error) {
+                console.error('Login error:', error);
+                Swal.fire({
+                    title: 'Oops!',
+                    text: 'Failed to login. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    color: '#fff',
+                    confirmButtonColor: '#FF512F'
+                });
+            }
+        });
+    </script>
+</body>
+</html>
