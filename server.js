@@ -20,6 +20,7 @@ app.use(express.json());
 
 // Serve static files
 app.use(express.static(__dirname));
+app.use('/static', express.static(join(__dirname, 'static')));
 app.use('/src', express.static(join(__dirname, 'src')));
 app.use('/src/images', express.static(join(__dirname, 'src', 'images')));
 
@@ -107,6 +108,23 @@ app.post('/api/score', async (req, res) => {
     } catch (error) {
         console.error('Score update error:', error);
         res.status(500).send('Error updating score');
+    }
+});
+
+// Add this new endpoint for user info
+app.get('/api/user/:userId', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        res.json({
+            studentName: user.studentName,
+            collegeName: user.collegeName
+        });
+    } catch (error) {
+        console.error('User info error:', error);
+        res.status(500).send('Error fetching user info');
     }
 });
 

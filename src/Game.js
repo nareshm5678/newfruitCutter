@@ -12,6 +12,17 @@ export class Game {
         this.fruitImages = [];
         this.loadFruitImages();
         
+        // Initialize and play background music
+        this.initBackgroundMusic();
+        
+        // Initialize fruit colors for effects
+        this.fruitColors = {
+            0: { primary: '#ff0000', secondary: '#ff6b6b' },  // Apple (red)
+            1: { primary: '#ffa500', secondary: '#ffd700' },  // Orange
+            2: { primary: '#ff0066', secondary: '#ff69b4' },  // Cherry
+            3: { primary: '#2ecc71', secondary: '#ff6b6b' }   // Watermelon
+        };
+        
         // Set canvas size to match container
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
@@ -36,6 +47,31 @@ export class Game {
                 };
             });
             this.fruitImages.push(img);
+        }
+    }
+
+    initBackgroundMusic() {
+        this.bgMusic = document.getElementById('bgMusic');
+        if (this.bgMusic) {
+            this.bgMusic.volume = 0.3;
+            
+            // Play music on user interaction
+            const playMusic = () => {
+                this.bgMusic.play()
+                    .then(() => {
+                        console.log('Background music started');
+                    })
+                    .catch(error => {
+                        console.log('Error playing background music:', error);
+                    });
+                // Remove the event listeners after first interaction
+                document.removeEventListener('click', playMusic);
+                document.removeEventListener('keydown', playMusic);
+            };
+
+            // Add event listeners for user interaction
+            document.addEventListener('click', playMusic);
+            document.addEventListener('keydown', playMusic);
         }
     }
 
@@ -125,6 +161,9 @@ export class Game {
             const fruit = this.fruitsInGame[i];
             if (!fruit.isSliced && this.checkCollision(x, y, fruit)) {
                 fruit.isSliced = true;
+                
+                // Create slicing effect at the fruit's position
+                this.createFruitSliceEffect(fruit.x + FRUIT_SIZE/2, fruit.y + FRUIT_SIZE/2, i);
                 
                 if (i === this.currentQuestion.correct) {
                     this.score += 10;
@@ -271,6 +310,39 @@ export class Game {
         document.getElementById('question').textContent = this.currentQuestion.question;
     }
 
+    createFruitSliceEffect(x, y, fruitIndex) {
+        // Create confetti burst effect
+        confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { x: x / window.innerWidth, y: y / window.innerHeight },
+            colors: [this.fruitColors[fruitIndex].primary, this.fruitColors[fruitIndex].secondary, '#ffffff'],
+            ticks: 200,
+            gravity: 0.8,
+            scalar: 1.2,
+            shapes: ['circle'],
+            zIndex: 9999
+        });
+
+        // Create juice splatter effect
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            confetti({
+                particleCount: 3,
+                angle: angle * 180 / Math.PI,
+                spread: 30,
+                startVelocity: 25,
+                origin: { x: x / window.innerWidth, y: y / window.innerHeight },
+                colors: [this.fruitColors[fruitIndex].primary],
+                ticks: 100,
+                gravity: 1,
+                scalar: 0.8,
+                shapes: ['circle'],
+                zIndex: 9999
+            });
+        }
+    }
+
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -280,27 +352,23 @@ export class Game {
                 // Draw fruit image
                 this.ctx.drawImage(fruit.image, fruit.x, fruit.y, FRUIT_SIZE, FRUIT_SIZE);
                 
-                // Draw option text with background
+                // Draw option text
                 this.ctx.save();
                 this.ctx.font = 'bold 20px Poppins';
                 const text = fruit.option;
-                const textWidth = this.ctx.measureText(text).width;
                 
-                // Draw text background
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                const padding = 10;
+                // Draw text with stroke for better visibility
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
                 const textY = fruit.y + FRUIT_SIZE + 25;
-                this.ctx.fillRect(
-                    fruit.x + FRUIT_SIZE/2 - textWidth/2 - padding,
-                    textY - 15,
-                    textWidth + padding * 2,
-                    30
-                );
+                
+                // Draw text stroke
+                this.ctx.strokeStyle = 'black';
+                this.ctx.lineWidth = 4;
+                this.ctx.strokeText(text, fruit.x + FRUIT_SIZE/2, textY);
                 
                 // Draw text
                 this.ctx.fillStyle = 'white';
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
                 this.ctx.fillText(text, fruit.x + FRUIT_SIZE/2, textY);
                 this.ctx.restore();
             }

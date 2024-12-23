@@ -13,6 +13,12 @@
     <div class="background-emojis"></div>
     
     <div class="game-container">
+        <div class="user-info-container">
+            <div class="user-info">
+                <div class="user-name"></div>
+                <div class="college-name"></div>
+            </div>
+        </div>
         <div class="score-container">
             <div class="score-label">SCORE</div>
             <div id="score">0</div>
@@ -36,9 +42,33 @@
             </div>
         </div>
     </div>
+    <audio id="bgMusic" loop>
+        <source src="/static/background-music.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
 
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script type="module">
         import { Game } from './src/Game.js';
+        
+        // Display user info from localStorage
+        function displayUserInfo() {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                if (userInfo) {
+                    document.querySelector('.user-name').textContent = userInfo.studentName.toUpperCase();
+                    document.querySelector('.college-name').textContent = userInfo.collegeName.toUpperCase();
+                } else {
+                    window.location.href = '/'; // Redirect to login if no user info
+                }
+            } catch (error) {
+                console.error('Error displaying user info:', error);
+                window.location.href = '/'; // Redirect to login if error
+            }
+        }
+        
+        // Display user info
+        displayUserInfo();
         
         // Custom cursor
         const cursor = document.querySelector('.cursor');
